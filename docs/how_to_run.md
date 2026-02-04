@@ -16,7 +16,13 @@ sbatch workflows/vision_train/sbatch_single.sh
 sbatch workflows/vision_infer/sbatch_single.sh
 ```
 
-For multi-node runs, set `MASTER_ADDR`/`MASTER_PORT` in the job or use `torchrun` explicitly.
+## LUMI (Slurm, 2 nodes)
+```bash
+sbatch workflows/llm_train/sbatch_2n.sh
+sbatch workflows/vision_train/sbatch_2n.sh
+```
+
+Multi-node runs use `torchrun` with `MASTER_ADDR` set from the Slurm nodelist.
 
 ## Output
 Each run writes a JSON report to `results/latest/` by default. The schema is in `results/schema.json`.

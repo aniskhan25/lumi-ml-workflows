@@ -31,6 +31,12 @@ sbatch workflows/vision_train/sbatch_single.sh
 sbatch workflows/vision_infer/sbatch_single.sh
 ```
 
+## Slurm (2 nodes)
+```bash
+sbatch workflows/llm_train/sbatch_2n.sh
+sbatch workflows/vision_train/sbatch_2n.sh
+```
+
 ## Repo layout
 - `workflows/` – workload implementations and configs
 - `slurm/` – common Slurm helpers and templates
