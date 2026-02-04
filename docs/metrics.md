@@ -15,6 +15,8 @@ Communication metrics (DDP):
 - `allreduce_time_ms_total`
 - `allreduce_bytes_total`
 
+When DDP is enabled, these are measured via a DDP communication hook on gradient buckets. If DDP is not enabled, the scripts can fall back to the synthetic allreduce timing.
+
 System metadata:
 - Container image path + digest
 - Slurm job settings (nodes, tasks, GPUs)

@@ -7,6 +7,8 @@ Key sections:
 - `model`: transformer sizes
 - `train`: batch/seq length, step counts, dtype
 - `output`: optional default output directory
+Notes:
+`train.measure_ddp_comm` enables DDP gradient allreduce timing. `train.measure_allreduce` enables synthetic allreduce timing (used when DDP is not active).
 
 ## LLM infer (`workflows/llm_infer/config.yaml`)
 Key sections:
@@ -19,6 +21,8 @@ Key sections:
 - `model`: ResNet-like settings (layers, channels)
 - `train`: batch/image size, step counts, dtype
 - `output`: optional default output directory
+Notes:
+`train.measure_ddp_comm` enables DDP gradient allreduce timing. `train.measure_allreduce` enables synthetic allreduce timing (used when DDP is not active).
 
 ## Vision infer (`workflows/vision_infer/config.yaml`)
 Key sections:

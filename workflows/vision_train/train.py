@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import uuid
+from contextlib import nullcontext
 from pathlib import Path
 
 import torch
@@ -13,6 +14,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from workflows.common.config import load_config, resolve_output_path, str_env
 from workflows.common.distributed import barrier, init_distributed, is_main_process, sync_device
+from workflows.common.ddp_comm import DDPCommStats, register_ddp_comm_hook
 from workflows.common.metrics import mean, now_s, percentile
 from workflows.common.report import write_report
 from workflows.common.system import gather_slurm_info, gather_system_info, utc_now
@@ -62,6 +64,7 @@ def main():
             "steps_measure": 30,
             "grad_accum": 1,
             "dtype": "bf16",
+            "measure_ddp_comm": True,
             "measure_allreduce": True,
             "allreduce_bytes": 1048576,
         },
@@ -118,15 +121,22 @@ def main():
     step_times = []
     allreduce_times = []
     allreduce_bytes_total = 0
+    ddp_comm_stats = None
+
+    if dist_enabled and bool(train_cfg.get("measure_ddp_comm", True)):
+        ddp_comm_stats = DDPCommStats(warmup_steps)
+        register_ddp_comm_hook(model, ddp_comm_stats)
 
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
 
     for step in range(total_steps):
+        if ddp_comm_stats is not None:
+            ddp_comm_stats.set_step(step)
         sync_device()
         start = now_s()
         optimizer.zero_grad(set_to_none=True)
-        for _ in range(grad_accum):
+        for micro_step in range(grad_accum):
             images = torch.randn(
                 batch_size,
                 int(model_cfg.get("in_channels", 3)),
@@ -140,13 +150,19 @@ def main():
                 (batch_size,),
                 device=device,
             )
-            with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_amp):
-                logits = model(images)
-                loss = F.cross_entropy(logits, labels)
-                loss = loss / grad_accum
-            loss.backward()
+            sync_ctx = nullcontext()
+            if dist_enabled and grad_accum > 1 and hasattr(model, "no_sync"):
+                if micro_step < grad_accum - 1:
+                    sync_ctx = model.no_sync()
 
-        if dist_enabled and measure_allreduce and allreduce_tensor is not None:
+            with sync_ctx:
+                with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_amp):
+                    logits = model(images)
+                    loss = F.cross_entropy(logits, labels)
+                    loss = loss / grad_accum
+                loss.backward()
+
+        if dist_enabled and measure_allreduce and allreduce_tensor is not None and ddp_comm_stats is None:
             sync_device()
             ar_start = now_s()
             torch.distributed.all_reduce(allreduce_tensor)
@@ -169,6 +185,10 @@ def main():
     samples_per_sec = None
     if step_time_avg:
         samples_per_sec = samples_per_step / (step_time_avg / 1000.0)
+
+    if ddp_comm_stats is not None:
+        allreduce_times = ddp_comm_stats.times_ms
+        allreduce_bytes_total = ddp_comm_stats.bytes_total
 
     gpu_max_mem_gb = None
     if torch.cuda.is_available():

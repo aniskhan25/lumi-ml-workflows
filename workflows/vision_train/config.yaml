@@ -12,6 +12,7 @@ train:
   steps_measure: 30
   grad_accum: 1
   dtype: bf16
+  measure_ddp_comm: true
   measure_allreduce: true
   allreduce_bytes: 1048576
 output:
