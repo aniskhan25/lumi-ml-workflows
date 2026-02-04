@@ -34,7 +34,9 @@ sbatch workflows/vision_infer/sbatch_single.sh
 ## Slurm (2 nodes)
 ```bash
 sbatch workflows/llm_train/sbatch_2n.sh
+sbatch workflows/llm_infer/sbatch_2n.sh
 sbatch workflows/vision_train/sbatch_2n.sh
+sbatch workflows/vision_infer/sbatch_2n.sh
 ```
 
 ## Repo layout
