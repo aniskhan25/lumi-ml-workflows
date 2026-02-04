@@ -1,0 +1,14 @@
+model:
+  in_channels: 3
+  num_classes: 1000
+  layers: 2,2,2,2
+  channels: 64,128,256,512
+  stem_width: 64
+infer:
+  image_size: 128
+  batch_size: 256
+  steps_warmup: 10
+  steps_measure: 30
+  dtype: bf16
+output:
+  directory: null
