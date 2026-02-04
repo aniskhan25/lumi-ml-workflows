@@ -39,6 +39,12 @@ sbatch workflows/vision_train/sbatch_2n.sh
 sbatch workflows/vision_infer/sbatch_2n.sh
 ```
 
+## Results summary
+Generate a quick Markdown table from `results/latest/`:
+```bash
+python scripts/summarize_results.py --results results/latest
+```
+
 ## Repo layout
 - `workflows/` – workload implementations and configs
 - `slurm/` – common Slurm helpers and templates
