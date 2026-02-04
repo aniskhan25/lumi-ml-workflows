@@ -1,11 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=vision-train
+#SBATCH --account=project_462000131
+#SBATCH --partition=small-g
 #SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=8
-#SBATCH --ntasks-per-node=8
+#SBATCH --gpus-per-task=8
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:10:00
-#SBATCH --partition=standard-g
 
 set -euo pipefail
 
@@ -14,11 +16,20 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 source "$REPO_ROOT/slurm/env.sh"
 
+MASTER_ADDR=127.0.0.1
+MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
+
 SRUN_ARGS=()
 if [[ -n "${CONTAINER_IMAGE:-}" ]]; then
   SRUN_ARGS+=(--container-image "$CONTAINER_IMAGE")
 fi
 
-srun "${SRUN_ARGS[@]}" \
-  python "$SCRIPT_DIR/train.py" \
-  --config "$SCRIPT_DIR/config.yaml"
+srun --ntasks-per-node=1 "${SRUN_ARGS[@]}" \
+  torchrun \
+    --nproc_per_node=8 \
+    --nnodes=1 \
+    --node_rank=0 \
+    --master_addr="$MASTER_ADDR" \
+    --master_port="$MASTER_PORT" \
+    "$SCRIPT_DIR/train.py" \
+    --config "$SCRIPT_DIR/config.yaml"

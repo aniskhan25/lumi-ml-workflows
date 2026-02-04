@@ -1,8 +1,16 @@
 #!/bin/bash
 
 # Common Slurm environment setup for LUMI
-# Set your container path here (example below). Leave empty to run without container flags.
-# export CONTAINER_IMAGE=/path/to/container.sif
-# export CONTAINER_DIGEST=sha256:...
+# Default container path can be overridden by setting CONTAINER_IMAGE.
+DEFAULT_CONTAINER="/appl/local/csc/soft/ai/images/pytorch_2.7.1_lumi.sif"
+
+if [[ -z "${CONTAINER_IMAGE:-}" ]]; then
+  export CONTAINER_IMAGE="$DEFAULT_CONTAINER"
+fi
+
+if command -v module >/dev/null 2>&1; then
+  module use /appl/local/csc/modulefiles/
+  module load pytorch/2.7
+fi
 
 export PYTHONUNBUFFERED=1

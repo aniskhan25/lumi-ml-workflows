@@ -1,11 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=vision-infer-2n
+#SBATCH --account=project_462000131
+#SBATCH --partition=small-g
 #SBATCH --nodes=2
-#SBATCH --gpus-per-node=8
 #SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --gpus-per-task=8
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:10:00
-#SBATCH --partition=standard-g
 
 set -euo pipefail
 
