@@ -2,6 +2,8 @@
 #SBATCH --job-name=vision-infer-2n
 #SBATCH --account=project_462000131
 #SBATCH --partition=small-g
+#SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
+#SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=8
