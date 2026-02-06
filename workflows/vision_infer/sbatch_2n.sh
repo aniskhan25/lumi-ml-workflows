@@ -10,7 +10,7 @@
 #SBATCH --gpus-per-task=8
 #SBATCH --cpus-per-task=7
 #SBATCH --mem=60G
-#SBATCH --time=00:10:00
+#SBATCH --time=01:00:00
 
 set -euo pipefail
 
