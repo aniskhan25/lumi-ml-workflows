@@ -7,7 +7,7 @@ python workflows/llm_infer/infer.py --config workflows/llm_infer/config.yaml
 ```
 
 ## LUMI (Slurm)
-1. Confirm `REPO_ROOT` (defaults to `/project/project_462000131/anisrahm/lumi-ml-workflows`) and container path in `slurm/env.sh`.
+1. Confirm `REPO_ROOT` (defaults to `/tmp/lumi-ml-workflows`) and container path in `slurm/env.sh`.
 2. Submit jobs:
 ```bash
 sbatch workflows/llm_train/sbatch_single.sh
