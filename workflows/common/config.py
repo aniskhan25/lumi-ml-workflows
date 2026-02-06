@@ -112,9 +112,13 @@ def resolve_output_path(output_path, repo_root, workload_type, run_id):
         if path.is_dir():
             return path / f"{workload_type}_{run_id}.json"
         return path
-    latest_dir = Path(repo_root) / "results" / "latest"
-    latest_dir.mkdir(parents=True, exist_ok=True)
-    return latest_dir / f"{workload_type}_{run_id}.json"
+    env_root = str_env("RESULTS_DIR")
+    if env_root:
+        base_dir = Path(env_root)
+    else:
+        base_dir = Path(repo_root) / "results" / "latest"
+    base_dir.mkdir(parents=True, exist_ok=True)
+    return base_dir / f"{workload_type}_{run_id}.json"
 
 
 def str_env(name, default=None):
