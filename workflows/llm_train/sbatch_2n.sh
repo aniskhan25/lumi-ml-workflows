@@ -36,7 +36,8 @@ source "$REPO_ROOT/slurm/env.sh"
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
-srun --nodes=2 --ntasks-per-node=1 \
+export SLURM_CPU_BIND=none
+srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 \
   torchrun \
     --nproc_per_node=8 \
     --nnodes=2 \
