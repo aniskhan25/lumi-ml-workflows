@@ -4,7 +4,6 @@
 #SBATCH --partition=small-g
 #SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
 #SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
-#SBATCH --chdir=/project/project_462000131/anisrahm/lumi-ml-workflows
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=8
@@ -17,6 +16,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
+if [[ -d "$REPO_ROOT" ]]; then
+  cd "$REPO_ROOT"
+fi
 
 source "$REPO_ROOT/slurm/env.sh"
 
