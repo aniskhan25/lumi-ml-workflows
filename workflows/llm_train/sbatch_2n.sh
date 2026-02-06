@@ -14,11 +14,22 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
-if [[ -d "$REPO_ROOT" ]]; then
-  cd "$REPO_ROOT"
+REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
+REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
+
+if [[ -z "$REPO_ROOT" || ! -d "$REPO_ROOT/slurm" ]]; then
+  if [[ -z "$REPO_GIT_URL" ]]; then
+    echo "REPO_ROOT not found and REPO_GIT_URL is empty. Set REPO_ROOT or REPO_GIT_URL." >&2
+    exit 1
+  fi
+  TMP_BASE="${SLURM_TMPDIR:-/tmp}"
+  REPO_ROOT="$TMP_BASE/lumi-ml-workflows"
+  if [[ ! -d "$REPO_ROOT/.git" ]]; then
+    git clone "$REPO_GIT_URL" "$REPO_ROOT"
+  fi
 fi
+
+cd "$REPO_ROOT"
 
 source "$REPO_ROOT/slurm/env.sh"
 
@@ -37,5 +48,5 @@ srun --nodes=2 --ntasks-per-node=1 "${SRUN_ARGS[@]}" \
     --node_rank="$SLURM_NODEID" \
     --master_addr="$MASTER_ADDR" \
     --master_port="$MASTER_PORT" \
-    "$SCRIPT_DIR/train.py" \
-    --config "$SCRIPT_DIR/config.yaml"
+    "$REPO_ROOT/workflows/llm_train/train.py" \
+    --config "$REPO_ROOT/workflows/llm_train/config.yaml"
