@@ -4,7 +4,7 @@
 #SBATCH --partition=small-g
 #SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
 #SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
-#SBATCH --chdir=/tmp/lumi-ml-workflows
+#SBATCH --chdir=/project/project_462000131/anisrahm/lumi-ml-workflows
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=8

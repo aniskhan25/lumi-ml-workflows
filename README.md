@@ -22,7 +22,7 @@ python workflows/vision_infer/infer.py --config workflows/vision_infer/config.ya
 Results are written to `results/latest/` by default.
 
 ## Slurm (LUMI)
-1. Confirm `REPO_ROOT` (defaults to `/tmp/lumi-ml-workflows`) and container image in `slurm/env.sh`.
+1. Confirm `REPO_ROOT` (defaults to `/project/project_462000131/anisrahm/lumi-ml-workflows`) and container image in `slurm/env.sh`.
 2. Submit a job:
 ```bash
 sbatch workflows/llm_train/sbatch_single.sh
