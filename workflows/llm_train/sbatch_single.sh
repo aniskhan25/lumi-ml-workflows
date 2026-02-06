@@ -36,9 +36,16 @@ source "$REPO_ROOT/slurm/env.sh"
 MASTER_ADDR=127.0.0.1
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
+SRUN_SUPPORTS_CONTAINER=0
+if srun --help 2>&1 | grep -q -- '--container-image'; then
+  SRUN_SUPPORTS_CONTAINER=1
+fi
+
 SRUN_ARGS=()
-if [[ -n "${CONTAINER_IMAGE:-}" ]]; then
+if [[ -n "${CONTAINER_IMAGE:-}" && "$SRUN_SUPPORTS_CONTAINER" -eq 1 ]]; then
   SRUN_ARGS+=(--container-image "$CONTAINER_IMAGE")
+elif [[ -n "${CONTAINER_IMAGE:-}" ]]; then
+  echo "srun does not support --container-image; ignoring CONTAINER_IMAGE" >&2
 fi
 
 srun --ntasks-per-node=1 "${SRUN_ARGS[@]}" \
