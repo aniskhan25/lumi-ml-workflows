@@ -21,6 +21,17 @@ def _maybe_set_env(name, value):
         os.environ[name] = str(value)
 
 
+def _visible_device_count():
+    for name in ("CUDA_VISIBLE_DEVICES", "HIP_VISIBLE_DEVICES"):
+        value = os.environ.get(name)
+        if value is None:
+            continue
+        if value.strip() == "":
+            return 0
+        return len([v for v in value.split(",") if v.strip() != ""])
+    return None
+
+
 def init_distributed():
     world_size = _env_int("WORLD_SIZE")
     if world_size is None:
@@ -43,6 +54,9 @@ def init_distributed():
     dist.init_process_group(backend=backend, init_method="env://")
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     if torch.cuda.is_available():
+        visible_count = _visible_device_count()
+        if visible_count is not None and visible_count > 0:
+            local_rank = local_rank % visible_count
         torch.cuda.set_device(local_rank)
     return True
 
