@@ -18,7 +18,7 @@ export SLURM_CPU_BIND=none
 
 if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
   echo "DEBUG_ENV=1 (printing env from rank 0)"
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
+  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
 fi
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
@@ -46,17 +46,18 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   fi
 
   export SLURM_CPU_BIND=none
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
+  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
       git clone "$REPO_GIT_URL" "$REPO_ROOT_LOCAL"; \
     fi'
 
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
+  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
+    PYTHON_BIN="${PYTHON_BIN:-python}"; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
-    python "$REPO_ROOT_LOCAL/workflows/vision_train/train.py" \
+    "$PYTHON_BIN" "$REPO_ROOT_LOCAL/workflows/vision_train/train.py" \
       --config "$REPO_ROOT_LOCAL/workflows/vision_train/config.yaml"'
   exit 0
 fi
@@ -78,6 +79,7 @@ MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
 export SLURM_CPU_BIND=none
-srun --cpu-bind=none --nodes=2 --ntasks-per-node=8 \
-  python "$REPO_ROOT/workflows/vision_train/train.py" \
+PYTHON_BIN="${PYTHON_BIN:-python}"
+srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 \
+  "$PYTHON_BIN" "$REPO_ROOT/workflows/vision_train/train.py" \
   --config "$REPO_ROOT/workflows/vision_train/config.yaml"

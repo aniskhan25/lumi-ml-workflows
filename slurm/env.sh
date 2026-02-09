@@ -16,4 +16,10 @@ if command -v module >/dev/null 2>&1; then
   module load pytorch/2.7
 fi
 
+if command -v python >/dev/null 2>&1; then
+  export PYTHON_BIN="$(command -v python)"
+elif command -v python3 >/dev/null 2>&1; then
+  export PYTHON_BIN="$(command -v python3)"
+fi
+
 export PYTHONUNBUFFERED=1
