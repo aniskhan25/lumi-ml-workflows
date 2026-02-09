@@ -19,6 +19,19 @@ if [[ -z "${RESULTS_INCLUDE_NODES:-}" ]]; then
   export RESULTS_INCLUDE_NODES=1
 fi
 
+if ! command -v module >/dev/null 2>&1; then
+  if [[ -f /etc/profile.d/modules.sh ]]; then
+    # shellcheck disable=SC1091
+    source /etc/profile.d/modules.sh
+  elif [[ -f /usr/share/Modules/init/bash ]]; then
+    # shellcheck disable=SC1091
+    source /usr/share/Modules/init/bash
+  elif [[ -f /etc/profile ]]; then
+    # shellcheck disable=SC1091
+    source /etc/profile
+  fi
+fi
+
 if command -v module >/dev/null 2>&1; then
   module use /appl/local/csc/modulefiles/
   module load singularity >/dev/null 2>&1 || true
