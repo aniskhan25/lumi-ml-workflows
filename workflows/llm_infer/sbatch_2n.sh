@@ -37,6 +37,8 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
     exit 1
   fi
   export REPO_GIT_URL
+  REPO_REF="${REPO_REF:-origin/main}"
+  export REPO_REF
   if [[ -z "${RESULTS_DIR:-}" ]]; then
     export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
   fi
@@ -51,7 +53,9 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
       git clone "$REPO_GIT_URL" "$REPO_ROOT_LOCAL"; \
-    fi'
+    fi; \
+    git -C "$REPO_ROOT_LOCAL" fetch --all --prune; \
+    git -C "$REPO_ROOT_LOCAL" reset --hard "$REPO_REF"'
 
   srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
