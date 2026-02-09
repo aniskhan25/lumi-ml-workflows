@@ -2,6 +2,7 @@
 #SBATCH --job-name=vision-train
 #SBATCH --account=project_462000131
 #SBATCH --partition=small-g
+#SBATCH --chdir=/tmp
 #SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
 #SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
 #SBATCH --nodes=1
