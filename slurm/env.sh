@@ -11,6 +11,10 @@ if [[ -z "${RESULTS_DIR:-}" ]]; then
   export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
 fi
 
+if [[ -z "${RESULTS_LATEST_ONLY:-}" ]]; then
+  export RESULTS_LATEST_ONLY=1
+fi
+
 if command -v module >/dev/null 2>&1; then
   module use /appl/local/csc/modulefiles/
   module load pytorch/2.7
