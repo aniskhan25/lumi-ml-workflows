@@ -46,6 +46,19 @@ Generate a quick Markdown table from `results/latest/`:
 python scripts/summarize_results.py --results results/latest
 ```
 
+Latest run summary:
+
+| workload | model | dtype | run_id | tokens_per_sec | samples_per_sec | step_time_ms_avg | step_time_ms_p95 | allreduce_time_ms_avg | gpu_max_mem_gb |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| llm_infer | gpt_small | bf16 | 27f0c305-1022-4798-abc6-b9d23680fd2e | 2655864.45 | - | 9.253 | 9.296 | - | 1.084 |
+| llm_infer | gpt_small | bf16 | 928d8d5d-ef14-4cc6-a913-20fb125be2a8 | 5350785.26 | - | 9.186 | 9.210 | - | 1.084 |
+| llm_train | gpt_small | bf16 | e2e003bd-7585-462e-8996-929860710699 | 897740.81 | - | 73.001 | 73.984 | 0.1615 | 6.894 |
+| llm_train | gpt_small | bf16 | 370d0b54-6a8f-4961-b883-285e5d35560c | 240296.26 | - | 545.460 | 581.622 | 0.1637 | 6.894 |
+| vision_infer | resnet_small | bf16 | 00596983-5cdf-432c-ba87-3284da256afb | - | 204902.38 | 9.995 | 10.022 | - | 0.6849 |
+| vision_infer | resnet_small | bf16 | 5618968b-468b-4629-9843-8593e086d80b | - | 405191.64 | 10.109 | 10.219 | - | 0.6849 |
+| vision_train | resnet_small | bf16 | fd4d3af2-f4aa-4c14-bbb6-5f9613bbb336 | - | 34002.63 | 30.115 | 37.487 | 0.1972 | 0.8213 |
+| vision_train | resnet_small | bf16 | ab708d7b-ba8d-4749-a428-1892916e6859 | - | 16171.67 | 126.641 | 133.157 | 0.1536 | 0.8174 |
+
 ## Repo layout
 - `workflows/` – workload implementations and configs
 - `slurm/` – common Slurm helpers and templates
