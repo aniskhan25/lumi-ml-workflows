@@ -22,7 +22,7 @@ def _maybe_set_env(name, value):
 
 
 def _visible_device_count():
-    for name in ("CUDA_VISIBLE_DEVICES", "HIP_VISIBLE_DEVICES"):
+    for name in ("HIP_VISIBLE_DEVICES", "ROCR_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES"):
         value = os.environ.get(name)
         if value is None:
             continue
