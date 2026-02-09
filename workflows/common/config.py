@@ -115,14 +115,24 @@ def resolve_output_path(output_path, repo_root, workload_type, run_id):
     env_root = str_env("RESULTS_DIR")
     latest_only = str_env("RESULTS_LATEST_ONLY")
     use_latest_only = str(latest_only).lower() in {"1", "true", "yes", "on"}
+    name_suffix = str_env("RESULTS_NAME_SUFFIX")
+    include_nodes = str_env("RESULTS_INCLUDE_NODES", "1")
+    if not name_suffix and str(include_nodes).lower() in {"1", "true", "yes", "on"}:
+        nodes = str_env("SLURM_JOB_NUM_NODES")
+        if nodes:
+            name_suffix = f"{nodes}n"
     if env_root:
         base_dir = Path(env_root)
     else:
         base_dir = Path(repo_root) / "results" / "latest"
     base_dir.mkdir(parents=True, exist_ok=True)
+    if name_suffix:
+        workload_name = f"{workload_type}_{name_suffix}"
+    else:
+        workload_name = workload_type
     if use_latest_only:
-        return base_dir / f"{workload_type}.json"
-    return base_dir / f"{workload_type}_{run_id}.json"
+        return base_dir / f"{workload_name}.json"
+    return base_dir / f"{workload_name}_{run_id}.json"
 
 
 def str_env(name, default=None):
