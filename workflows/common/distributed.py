@@ -65,6 +65,7 @@ def init_distributed():
         local_rank = local_rank % visible_count
         if local_rank >= device_count:
             local_rank = local_rank % device_count
+        os.environ["LOCAL_RANK"] = str(local_rank)
         torch.cuda.set_device(local_rank)
     return True
 
