@@ -37,9 +37,7 @@ class GPTSmall(nn.Module):
             batch_first=True,
             norm_first=True,
         )
-        self.encoder = nn.TransformerEncoder(
-            encoder_layer, num_layers=n_layers, enable_nested_tensor=False
-        )
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
         mask = torch.triu(torch.ones(max_seq_len, max_seq_len), diagonal=1).bool()
         self.register_buffer("attn_mask", mask, persistent=False)
