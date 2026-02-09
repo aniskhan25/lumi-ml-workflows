@@ -5,9 +5,9 @@
 #SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
 #SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
 #SBATCH --nodes=2
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=8
 #SBATCH --gpus-per-node=8
-#SBATCH --gpus-per-task=8
+#SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=7
 #SBATCH --mem=60G
 #SBATCH --time=01:00:00
@@ -37,12 +37,6 @@ MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
 export SLURM_CPU_BIND=none
-srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 \
-  torchrun \
-    --nproc_per_node=8 \
-    --nnodes=2 \
-    --node_rank="$SLURM_NODEID" \
-    --master_addr="$MASTER_ADDR" \
-    --master_port="$MASTER_PORT" \
-    "$REPO_ROOT/workflows/vision_train/train.py" \
-    --config "$REPO_ROOT/workflows/vision_train/config.yaml"
+srun --cpu-bind=none --nodes=2 --ntasks-per-node=8 \
+  python "$REPO_ROOT/workflows/vision_train/train.py" \
+  --config "$REPO_ROOT/workflows/vision_train/config.yaml"
