@@ -24,6 +24,12 @@ elif [[ "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]; then
   USE_NODE_LOCAL=1
 fi
 
+echo "LOCAL_RANK=${LOCAL_RANK:-}"
+echo "SLURM_LOCALID=${SLURM_LOCALID:-}"
+echo "ROCR_VISIBLE_DEVICES=${ROCR_VISIBLE_DEVICES:-}"
+echo "HIP_VISIBLE_DEVICES=${HIP_VISIBLE_DEVICES:-}"
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}"
+
 if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   if [[ -z "$REPO_GIT_URL" ]]; then
     echo "REPO_GIT_URL is empty; cannot clone repo on nodes." >&2
