@@ -51,7 +51,6 @@ def init_distributed():
         _maybe_set_env("MASTER_PORT", 29500)
 
     backend = "nccl" if torch.cuda.is_available() else "gloo"
-    dist.init_process_group(backend=backend, init_method="env://")
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     if torch.cuda.is_available():
         device_count = torch.cuda.device_count()
@@ -67,6 +66,11 @@ def init_distributed():
             local_rank = local_rank % device_count
         os.environ["LOCAL_RANK"] = str(local_rank)
         torch.cuda.set_device(local_rank)
+        dist.init_process_group(
+            backend=backend, init_method="env://", device_id=local_rank
+        )
+    else:
+        dist.init_process_group(backend=backend, init_method="env://")
     return True
 
 
@@ -81,4 +85,13 @@ def sync_device():
 
 def barrier():
     if dist.is_initialized():
-        dist.barrier()
+        if torch.cuda.is_available():
+            local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+            dist.barrier(device_ids=[local_rank])
+        else:
+            dist.barrier()
+
+
+def destroy_process_group():
+    if dist.is_initialized():
+        dist.destroy_process_group()

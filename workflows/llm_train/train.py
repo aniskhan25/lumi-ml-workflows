@@ -14,7 +14,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from workflows.common.config import load_config, resolve_output_path, str_env
-from workflows.common.distributed import barrier, init_distributed, is_main_process, sync_device
+from workflows.common.distributed import (
+    barrier,
+    destroy_process_group,
+    init_distributed,
+    is_main_process,
+    sync_device,
+)
 from workflows.common.ddp_comm import DDPCommStats, register_ddp_comm_hook
 from workflows.common.metrics import mean, now_s, percentile
 from workflows.common.report import write_report
@@ -35,7 +41,9 @@ class GPTSmall(nn.Module):
             batch_first=True,
             norm_first=True,
         )
-        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
+        self.encoder = nn.TransformerEncoder(
+            encoder_layer, num_layers=n_layers, enable_nested_tensor=False
+        )
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
         mask = torch.triu(torch.ones(max_seq_len, max_seq_len), diagonal=1).bool()
         self.register_buffer("attn_mask", mask, persistent=False)
@@ -246,6 +254,8 @@ def main():
         )
         write_report(output_path, report)
         print(f"Wrote report to {output_path}")
+
+    destroy_process_group()
 
 
 if __name__ == "__main__":
