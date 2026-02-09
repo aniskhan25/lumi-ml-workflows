@@ -11,6 +11,13 @@ DEFAULT_METRICS = [
     "gpu_max_mem_gb",
 ]
 
+DEFAULT_CONTEXT = [
+    "nodes",
+    "ntasks",
+    "gpus_per_node",
+    "cpus_per_task",
+    "partition",
+]
 
 def load_reports(result_dir):
     reports = []
@@ -39,11 +46,18 @@ def format_value(value):
 def report_row(report, metrics):
     workload = report.get("workload", {})
     metrics_data = report.get("metrics", {})
+    slurm = report.get("slurm", {})
+    system = report.get("system", {})
     row = {
         "workload": workload.get("type", "?"),
         "model": workload.get("model", "?"),
         "dtype": workload.get("dtype", "?"),
         "run_id": report.get("run_id", "?"),
+        "nodes": format_value(slurm.get("nodes")),
+        "ntasks": format_value(slurm.get("ntasks")),
+        "gpus_per_node": format_value(slurm.get("gpus_per_node")),
+        "cpus_per_task": format_value(slurm.get("cpus_per_task")),
+        "partition": format_value(system.get("partition")),
     }
     for key in metrics:
         row[key] = format_value(metrics_data.get(key))
@@ -51,7 +65,7 @@ def report_row(report, metrics):
 
 
 def to_markdown(rows, metrics):
-    headers = ["workload", "model", "dtype", "run_id"] + metrics
+    headers = ["workload", "model", "dtype", "run_id"] + DEFAULT_CONTEXT + metrics
     lines = []
     lines.append("| " + " | ".join(headers) + " |")
     lines.append("| " + " | ".join(["---"] * len(headers)) + " |")

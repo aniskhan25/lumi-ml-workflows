@@ -41,7 +41,7 @@ sbatch workflows/vision_infer/sbatch_2n.sh
 ```
 
 ## Results summary
-Generate a quick Markdown table from `results/latest/`:
+Generate a quick Markdown table (includes nodes/GPUs/CPUs/partition):
 ```bash
 python scripts/summarize_results.py --results results/latest
 ```
