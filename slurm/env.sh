@@ -21,6 +21,9 @@ fi
 
 if command -v module >/dev/null 2>&1; then
   module use /appl/local/csc/modulefiles/
+  module load singularity >/dev/null 2>&1 || true
+  module load apptainer >/dev/null 2>&1 || true
+  module load lumi-container-wrapper >/dev/null 2>&1 || true
   module load pytorch/2.7
 fi
 
