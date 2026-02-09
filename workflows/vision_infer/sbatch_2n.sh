@@ -18,7 +18,7 @@ export SLURM_CPU_BIND=none
 
 if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
   echo "DEBUG_ENV=1 (printing env from rank 0)"
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -lc 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
+  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
 fi
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
@@ -46,14 +46,14 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   fi
 
   export SLURM_CPU_BIND=none
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -lc '\
+  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
       git clone "$REPO_GIT_URL" "$REPO_ROOT_LOCAL"; \
     fi'
 
-  srun --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -lc '\
+  srun --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     python "$REPO_ROOT_LOCAL/workflows/vision_infer/infer.py" \
