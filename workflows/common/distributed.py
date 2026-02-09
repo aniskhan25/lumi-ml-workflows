@@ -54,9 +54,17 @@ def init_distributed():
     dist.init_process_group(backend=backend, init_method="env://")
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     if torch.cuda.is_available():
+        device_count = torch.cuda.device_count()
+        if device_count <= 0:
+            raise RuntimeError(
+                "No visible GPUs detected. Check ROCR_VISIBLE_DEVICES/HIP_VISIBLE_DEVICES/CUDA_VISIBLE_DEVICES."
+            )
         visible_count = _visible_device_count()
-        if visible_count is not None and visible_count > 0:
-            local_rank = local_rank % visible_count
+        if visible_count is None or visible_count <= 0:
+            visible_count = device_count
+        local_rank = local_rank % visible_count
+        if local_rank >= device_count:
+            local_rank = local_rank % device_count
         torch.cuda.set_device(local_rank)
     return True
 
