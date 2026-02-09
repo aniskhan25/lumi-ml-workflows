@@ -14,9 +14,11 @@
 
 set -euo pipefail
 
+export SLURM_CPU_BIND=none
+
 if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
   echo "DEBUG_ENV=1 (printing env from rank 0)"
-  srun --nodes=2 --ntasks-per-node=1 bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
+  srun --cpu-bind=none --nodes=2 --ntasks-per-node=1 bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
 fi
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
