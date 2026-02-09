@@ -28,6 +28,8 @@ if [[ -z "$REPO_ROOT" || ! -d "$REPO_ROOT/slurm" ]]; then
   if [[ ! -d "$REPO_ROOT/.git" ]]; then
     git clone "$REPO_GIT_URL" "$REPO_ROOT"
   fi
+  git -C "$REPO_ROOT" fetch --all --prune
+  git -C "$REPO_ROOT" reset --hard "${REPO_REF:-origin/main}"
 fi
 
 cd "$REPO_ROOT"
