@@ -67,7 +67,9 @@ def init_distributed():
         os.environ["LOCAL_RANK"] = str(local_rank)
         torch.cuda.set_device(local_rank)
         dist.init_process_group(
-            backend=backend, init_method="env://", device_id=local_rank
+            backend=backend,
+            init_method="env://",
+            device_id=torch.device("cuda", local_rank),
         )
     else:
         dist.init_process_group(backend=backend, init_method="env://")
