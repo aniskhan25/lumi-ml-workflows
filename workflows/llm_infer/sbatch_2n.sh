@@ -15,6 +15,9 @@
 set -euo pipefail
 
 export SLURM_CPU_BIND=none
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
+export MASTER_ADDR MASTER_PORT
 
 if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
   echo "DEBUG_ENV=1 (printing env from rank 0)"
@@ -78,9 +81,6 @@ else
     module load pytorch/2.7
   fi
 fi
-
-MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
-MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
 export SLURM_CPU_BIND=none
 PYTHON_BIN="${PYTHON_BIN:-python}"
