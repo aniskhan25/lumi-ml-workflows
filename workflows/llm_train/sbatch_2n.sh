@@ -23,6 +23,8 @@ SRUN_BASE=(srun --export=ALL --cpu-bind=none --nodes=2)
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
+REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"
+export REPO_ROOT_LOCAL
 
 if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]; then
   if [[ -z "$REPO_GIT_URL" ]]; then
@@ -35,7 +37,6 @@ if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]
 
   "${SRUN_BASE[@]}" --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
-    REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
       git clone "$REPO_GIT_URL" "$REPO_ROOT_LOCAL"; \
     fi; \
@@ -44,10 +45,8 @@ if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]
 
   "${SRUN_BASE[@]}" --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
-    REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     export REPO_ROOT="$REPO_ROOT_LOCAL"; \
     source "$REPO_ROOT_LOCAL/slurm/env.sh"; \
-    PYTHON_BIN="${PYTHON_BIN:-python}"; \
     "$PYTHON_BIN" "$REPO_ROOT_LOCAL/workflows/llm_train/train.py" \
       --config "$REPO_ROOT_LOCAL/workflows/llm_train/config.yaml"'
   exit 0
