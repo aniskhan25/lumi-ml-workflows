@@ -19,7 +19,7 @@ MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 export MASTER_ADDR MASTER_PORT
 
-SRUN_BASE=(srun --export=ALL --cpu-bind=none --nodes=2)
+SRUN_BASE=(srun --export=ALL --cpu-bind=none)
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
