@@ -35,11 +35,6 @@ setup_env_defaults() {
   fi
 }
 
-if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
-  echo "DEBUG_ENV=1 (printing env from rank 0)"
-  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c 'env | egrep "LOCAL_RANK|SLURM_LOCALID|ROCR_VISIBLE_DEVICES|HIP_VISIBLE_DEVICES|CUDA_VISIBLE_DEVICES"'
-fi
-
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
 USE_NODE_LOCAL=0
