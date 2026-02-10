@@ -19,22 +19,6 @@ MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 export MASTER_ADDR MASTER_PORT
 
-setup_env_defaults() {
-  if [[ -z "${RESULTS_DIR:-}" ]]; then
-    export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
-  fi
-  if [[ -z "${RESULTS_LATEST_ONLY:-}" ]]; then
-    export RESULTS_LATEST_ONLY=1
-  fi
-  if [[ -z "${RESULTS_INCLUDE_NODES:-}" ]]; then
-    export RESULTS_INCLUDE_NODES=1
-  fi
-  if command -v module >/dev/null 2>&1; then
-    module use /appl/local/csc/modulefiles/
-    module load pytorch/2.7
-  fi
-}
-
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
 USE_NODE_LOCAL=0
@@ -59,7 +43,6 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   export REPO_GIT_URL
   REPO_REF="${REPO_REF:-origin/main}"
   export REPO_REF
-  setup_env_defaults
 
   srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
@@ -72,8 +55,10 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
 
   srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
-    PYTHON_BIN="${PYTHON_BIN:-python}"; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
+    export REPO_ROOT="$REPO_ROOT_LOCAL"; \
+    source "$REPO_ROOT_LOCAL/slurm/env.sh"; \
+    PYTHON_BIN="${PYTHON_BIN:-python}"; \
     "$PYTHON_BIN" "$REPO_ROOT_LOCAL/workflows/llm_train/train.py" \
       --config "$REPO_ROOT_LOCAL/workflows/llm_train/config.yaml"'
   exit 0
@@ -82,8 +67,6 @@ fi
 if [[ -d "$REPO_ROOT/slurm" ]]; then
   cd "$REPO_ROOT"
   source "$REPO_ROOT/slurm/env.sh"
-else
-  setup_env_defaults
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
