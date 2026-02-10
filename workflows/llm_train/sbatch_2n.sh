@@ -15,10 +15,25 @@
 
 set -euo pipefail
 
-export SLURM_CPU_BIND=none
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 export MASTER_ADDR MASTER_PORT
+
+setup_env_defaults() {
+  if [[ -z "${RESULTS_DIR:-}" ]]; then
+    export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
+  fi
+  if [[ -z "${RESULTS_LATEST_ONLY:-}" ]]; then
+    export RESULTS_LATEST_ONLY=1
+  fi
+  if [[ -z "${RESULTS_INCLUDE_NODES:-}" ]]; then
+    export RESULTS_INCLUDE_NODES=1
+  fi
+  if command -v module >/dev/null 2>&1; then
+    module use /appl/local/csc/modulefiles/
+    module load pytorch/2.7
+  fi
+}
 
 if [[ "${DEBUG_ENV:-0}" == "1" ]]; then
   echo "DEBUG_ENV=1 (printing env from rank 0)"
@@ -49,21 +64,8 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   export REPO_GIT_URL
   REPO_REF="${REPO_REF:-origin/main}"
   export REPO_REF
-  if [[ -z "${RESULTS_DIR:-}" ]]; then
-    export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
-  fi
-  if [[ -z "${RESULTS_LATEST_ONLY:-}" ]]; then
-    export RESULTS_LATEST_ONLY=1
-  fi
-  if [[ -z "${RESULTS_INCLUDE_NODES:-}" ]]; then
-    export RESULTS_INCLUDE_NODES=1
-  fi
-  if command -v module >/dev/null 2>&1; then
-    module use /appl/local/csc/modulefiles/
-    module load pytorch/2.7
-  fi
+  setup_env_defaults
 
-  export SLURM_CPU_BIND=none
   srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
@@ -86,16 +88,9 @@ if [[ -d "$REPO_ROOT/slurm" ]]; then
   cd "$REPO_ROOT"
   source "$REPO_ROOT/slurm/env.sh"
 else
-  if [[ -z "${RESULTS_DIR:-}" ]]; then
-    export RESULTS_DIR="/project/project_462000131/anisrahm/lumi-ml-workflows/results"
-  fi
-  if command -v module >/dev/null 2>&1; then
-    module use /appl/local/csc/modulefiles/
-    module load pytorch/2.7
-  fi
+  setup_env_defaults
 fi
 
-export SLURM_CPU_BIND=none
 PYTHON_BIN="${PYTHON_BIN:-python}"
 srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 \
   "$PYTHON_BIN" "$REPO_ROOT/workflows/llm_train/train.py" \
