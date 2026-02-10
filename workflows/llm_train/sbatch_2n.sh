@@ -35,7 +35,7 @@ if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]
   REPO_REF="${REPO_REF:-origin/main}"
   export REPO_REF
 
-  "${SRUN_BASE[@]}" --ntasks-per-node=1 /bin/bash -c '\
+  "${SRUN_BASE[@]}" --nodes=2 --ntasks=2 --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
       git clone "$REPO_GIT_URL" "$REPO_ROOT_LOCAL"; \
@@ -43,7 +43,7 @@ if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]
     git -C "$REPO_ROOT_LOCAL" fetch --all --prune; \
     git -C "$REPO_ROOT_LOCAL" reset --hard "$REPO_REF"'
 
-  "${SRUN_BASE[@]}" --ntasks-per-node=8 /bin/bash -c '\
+  "${SRUN_BASE[@]}" --nodes=2 --ntasks=16 --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
     export REPO_ROOT="$REPO_ROOT_LOCAL"; \
     source "$REPO_ROOT_LOCAL/slurm/env.sh"; \
@@ -58,6 +58,6 @@ if [[ -d "$REPO_ROOT/slurm" ]]; then
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
-"${SRUN_BASE[@]}" --ntasks-per-node=8 \
+"${SRUN_BASE[@]}" --nodes=2 --ntasks=16 --ntasks-per-node=8 \
   "$PYTHON_BIN" "$REPO_ROOT/workflows/llm_train/train.py" \
   --config "$REPO_ROOT/workflows/llm_train/config.yaml"
