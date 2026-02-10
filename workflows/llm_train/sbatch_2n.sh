@@ -23,15 +23,8 @@ SRUN_BASE=(srun --export=ALL --cpu-bind=none --nodes=2)
 
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
-USE_NODE_LOCAL=0
 
-if [[ -z "$REPO_ROOT" ]]; then
-  USE_NODE_LOCAL=1
-elif [[ "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]; then
-  USE_NODE_LOCAL=1
-fi
-
-if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
+if [[ -z "$REPO_ROOT" || "$REPO_ROOT" == /tmp/* || "$REPO_ROOT" == /var/tmp/* ]]; then
   if [[ -z "$REPO_GIT_URL" ]]; then
     echo "REPO_GIT_URL is empty; cannot clone repo on nodes." >&2
     exit 1
