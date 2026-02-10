@@ -19,6 +19,8 @@ MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 export MASTER_ADDR MASTER_PORT
 
+SRUN_BASE=(srun --export=ALL --cpu-bind=none --nodes=2)
+
 REPO_GIT_URL="${REPO_GIT_URL:-https://github.com/aniskhan25/lumi-ml-workflows.git}"
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-}}"
 USE_NODE_LOCAL=0
@@ -38,7 +40,7 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
   REPO_REF="${REPO_REF:-origin/main}"
   export REPO_REF
 
-  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=1 /bin/bash -c '\
+  "${SRUN_BASE[@]}" --ntasks-per-node=1 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     if [[ ! -d "$REPO_ROOT_LOCAL/.git" ]]; then \
@@ -47,7 +49,7 @@ if [[ "$USE_NODE_LOCAL" -eq 1 ]]; then
     git -C "$REPO_ROOT_LOCAL" fetch --all --prune; \
     git -C "$REPO_ROOT_LOCAL" reset --hard "$REPO_REF"'
 
-  srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 /bin/bash -c '\
+  "${SRUN_BASE[@]}" --ntasks-per-node=8 /bin/bash -c '\
     set -euo pipefail; \
     REPO_ROOT_LOCAL="${SLURM_TMPDIR:-/tmp}/lumi-ml-workflows"; \
     export REPO_ROOT="$REPO_ROOT_LOCAL"; \
@@ -64,6 +66,6 @@ if [[ -d "$REPO_ROOT/slurm" ]]; then
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
-srun --export=ALL --cpu-bind=none --nodes=2 --ntasks-per-node=8 \
+"${SRUN_BASE[@]}" --ntasks-per-node=8 \
   "$PYTHON_BIN" "$REPO_ROOT/workflows/llm_train/train.py" \
   --config "$REPO_ROOT/workflows/llm_train/config.yaml"
