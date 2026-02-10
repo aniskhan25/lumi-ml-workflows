@@ -6,9 +6,9 @@
 #SBATCH --output=/scratch/project_462000131/anisrahm/slurm/%x-%j.out
 #SBATCH --error=/scratch/project_462000131/anisrahm/slurm/%x-%j.err
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=8
 #SBATCH --gpus-per-node=8
-#SBATCH --gpus-per-task=8
+#SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=7
 #SBATCH --mem=60G
 #SBATCH --time=00:10:00
@@ -35,17 +35,12 @@ fi
 cd "$REPO_ROOT"
 source "$REPO_ROOT/slurm/env.sh"
 
-MASTER_ADDR=127.0.0.1
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
+export MASTER_ADDR MASTER_PORT
 
 export SLURM_CPU_BIND=none
 PYTHON_BIN="${PYTHON_BIN:-python}"
-srun --export=ALL --cpu-bind=none --ntasks-per-node=1 \
-  "$PYTHON_BIN" -m torch.distributed.run \
-    --nproc_per_node=8 \
-    --nnodes=1 \
-    --node_rank=0 \
-    --master_addr="$MASTER_ADDR" \
-    --master_port="$MASTER_PORT" \
-    "$REPO_ROOT/workflows/llm_train/train.py" \
-    --config "$REPO_ROOT/workflows/llm_train/config.yaml"
+srun --export=ALL --cpu-bind=none --ntasks-per-node=8 \
+  "$PYTHON_BIN" "$REPO_ROOT/workflows/llm_train/train.py" \
+  --config "$REPO_ROOT/workflows/llm_train/config.yaml"
