@@ -40,6 +40,13 @@ sbatch workflows/vision_train/sbatch_2n.sh
 sbatch workflows/vision_infer/sbatch_2n.sh
 ```
 
+## Single vs multi-node experiments
+Single-node runs are the **baseline** for correctness and per-node throughput. They use 1 node with 8 GPUs and 8 ranks (1 GPU per rank), which matches the per‑GPU CPU allocation of the multi-node runs.
+
+Multi-node runs test **scale-out** across the network. They use 2 nodes with 8 GPUs each (16 total) and 16 ranks. Use these to compare scaling and communication overhead vs the single-node baseline.
+
+Results use `RESULTS_INCLUDE_NODES=1`, so filenames include node count (e.g., `llm_train_1n.json`, `llm_train_2n.json`).
+
 ## Results summary
 Generate a quick Markdown table (includes nodes/GPUs/CPUs/partition):
 ```bash
