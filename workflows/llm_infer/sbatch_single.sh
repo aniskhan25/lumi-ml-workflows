@@ -38,9 +38,8 @@ source "$REPO_ROOT/slurm/env.sh"
 MASTER_ADDR=127.0.0.1
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 
-export SLURM_CPU_BIND=none
 PYTHON_BIN="${PYTHON_BIN:-python}"
-srun --export=ALL --cpu-bind=none --ntasks-per-node=1 \
+srun --export=ALL --cpu-bind=none \
   "$PYTHON_BIN" -m torch.distributed.run \
     --nproc_per_node=8 \
     --nnodes=1 \

@@ -35,12 +35,11 @@ fi
 cd "$REPO_ROOT"
 source "$REPO_ROOT/slurm/env.sh"
 
-MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+MASTER_ADDR=127.0.0.1
 MASTER_PORT=$((10000 + SLURM_JOB_ID % 50000))
 export MASTER_ADDR MASTER_PORT
 
-export SLURM_CPU_BIND=none
 PYTHON_BIN="${PYTHON_BIN:-python}"
-srun --export=ALL --cpu-bind=none --ntasks-per-node=8 \
+srun --export=ALL --cpu-bind=none \
   "$PYTHON_BIN" "$REPO_ROOT/workflows/llm_train/train.py" \
   --config "$REPO_ROOT/workflows/llm_train/config.yaml"
